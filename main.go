@@ -30,7 +30,6 @@ type BookingRequest struct {
 }
 
 func main() {
-
 	response, err := http.Get("https://app.swaggerhub.com/apis-docs/BlackfireSFL/BackendChallenge/1.0.1#/")
 
 	if err != nil {

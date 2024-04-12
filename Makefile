@@ -1,5 +1,5 @@
 build:
-	mkdir out
+	mkdir -p out
 	go build -o out/booking-api
 
 run:

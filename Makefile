@@ -13,3 +13,14 @@ coverage:
 
 clean:
 	rm -Rf out
+
+tools:
+	go install honnef.co/go/tools/cmd/staticcheck@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.1
+
+check:
+	staticcheck ./...
+
+
+lint:
+	golangci-lint run -v ./...

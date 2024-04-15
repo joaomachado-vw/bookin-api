@@ -5,7 +5,7 @@ build:
 run:
 	go run main.go
 
-test:
+test: check
 	go test -v ./...
 
 coverage:

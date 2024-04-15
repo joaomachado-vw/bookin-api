@@ -21,6 +21,5 @@ tools:
 check:
 	staticcheck ./...
 
-
 lint:
 	golangci-lint run -v ./...

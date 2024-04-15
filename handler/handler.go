@@ -30,6 +30,8 @@ func BookingHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		bookings = append(bookings, bookingRequest)
-		json.NewEncoder(w).Encode(bookingRequest)
+		if err := json.NewEncoder(w).Encode(bookingRequest); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }

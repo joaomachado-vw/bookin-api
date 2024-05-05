@@ -31,23 +31,23 @@ func TestHandlerPOST(t *testing.T) {
 
 func TestBookingRequestListHandler(t *testing.T) {
 	expectedBody := `
-[
-  {
-    "request_id": "123",
-    "check_in": "2024-04-29",
-    "nights": 2,
-    "selling_rate": 50,
-    "margin": 20
-  },
-  {
-    "request_id": "456",
-    "check_in": "2024-05-01",
-    "nights": 5,
-    "selling_rate": 30,
-    "margin": 30
-  }
-]
-`
+	[
+	  {
+		"request_id": "123",
+		"check_in": "2024-04-29",
+		"nights": 2,
+		"selling_rate": 50,
+		"margin": 20
+	  },
+	  {
+		"request_id": "456",
+		"check_in": "2024-05-01",
+		"nights": 5,
+		"selling_rate": 30,
+		"margin": 30
+	  }
+	]
+	`
 	body := []byte(expectedBody)
 	req, _ := http.NewRequest("POST", "/stats", bytes.NewBuffer(body))
 	response := httptest.NewRecorder()
@@ -57,4 +57,37 @@ func TestBookingRequestListHandler(t *testing.T) {
 	var expectedBookings []BookingRequestJSON
 	json.Unmarshal([]byte(expectedBody), &expectedBookings)
 	assert.Equal(t, expectedBookings, actualBookings)
+}
+
+func TestStatsResponse(t *testing.T) {
+	bodyJSON := `
+	[
+	  {
+		"request_id": "123",
+		"check_in": "2024-04-29",
+		"nights": 5,
+		"selling_rate": 200,
+		"margin": 20
+	  },
+	  {
+		"request_id": "456",
+		"check_in": "2024-05-01",
+		"nights": 4,
+		"selling_rate": 156,
+		"margin": 22
+	  }
+	]
+	`
+
+	body := []byte(bodyJSON)
+	req, _ := http.NewRequest("POST", "/stats", bytes.NewBuffer(body))
+	response := httptest.NewRecorder()
+	statsJSON := StatsResponse(response, req)
+	expectedAvg := StatsResponseJSON{
+		avg_night: 8.29,
+		min_night: 8,
+		max_night: 8.58,
+	}
+	actualJSON, _ := json.Marshal(expectedAvg)
+	assert.Equal(t, actualJSON, statsJSON)
 }

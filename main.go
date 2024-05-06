@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -9,6 +10,7 @@ import (
 )
 
 const generalTimeoutSec = 15
+const serverPort = 8080
 
 type Booking struct {
 	SellingRate float64 `json:"selling_rate"`
@@ -37,7 +39,7 @@ func addRoutes(mux *http.ServeMux) {
 
 func startServer(mux *http.ServeMux) error {
 	s := &http.Server{
-		Addr:         ":8080",
+		Addr:         fmt.Sprintf(":%d", serverPort),
 		Handler:      mux,
 		ReadTimeout:  generalTimeoutSec * time.Second,
 		WriteTimeout: generalTimeoutSec * time.Second,

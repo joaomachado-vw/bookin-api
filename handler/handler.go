@@ -14,9 +14,9 @@ type BookingRequestJSON struct {
 }
 
 type StatsResponseJSON struct {
-	avg_night float64 `json:"avg_night"`
-	min_night float64 `json:"min_night"`
-	max_night float64 `json:"max_night"`
+	AvgNight float64 `json:"avg_night"`
+	MinNight float64 `json:"min_night"`
+	MaxNight float64 `json:"max_night"`
 }
 
 var bookings []BookingRequestJSON
@@ -82,16 +82,16 @@ func ErrorResponse(w http.ResponseWriter, err error, errorType int) {
 func StatsResponse(w http.ResponseWriter, r *http.Request) []byte {
 	BookingRequestListHandler(w, r)
 	for _, bookingRequest := range bookings {
-		avg_night := (bookingRequest.SellingRate * (bookingRequest.Margin / 100) / float64(bookingRequest.Nights))
-		statsResponse.avg_night += avg_night
-		if avg_night < statsResponse.min_night || statsResponse.min_night == 0 {
-			statsResponse.min_night = avg_night
+		avg_night := bookingRequest.SellingRate * (bookingRequest.Margin / 100) / float64(bookingRequest.Nights)
+		statsResponse.AvgNight += avg_night
+		if avg_night < statsResponse.MinNight || statsResponse.MinNight == 0 {
+			statsResponse.MinNight = avg_night
 		}
-		if avg_night > statsResponse.max_night {
-			statsResponse.max_night = avg_night
+		if avg_night > statsResponse.MaxNight {
+			statsResponse.MaxNight = avg_night
 		}
 	}
-	statsResponse.avg_night /= float64(len(bookings))
+	statsResponse.AvgNight /= float64(len(bookings))
 	statsJSON, err := json.Marshal(statsResponse)
 	if err != nil {
 		ErrorResponse(w, err, http.StatusBadRequest)

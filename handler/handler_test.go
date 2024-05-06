@@ -3,10 +3,11 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandlerGET(t *testing.T) {
@@ -84,9 +85,9 @@ func TestStatsResponse(t *testing.T) {
 	response := httptest.NewRecorder()
 	statsJSON := StatsResponse(response, req)
 	expectedAvg := StatsResponseJSON{
-		avg_night: 8.29,
-		min_night: 8,
-		max_night: 8.58,
+		AvgNight: 8.29,
+		MinNight: 8,
+		MaxNight: 8.58,
 	}
 	actualJSON, _ := json.Marshal(expectedAvg)
 	assert.Equal(t, actualJSON, statsJSON)

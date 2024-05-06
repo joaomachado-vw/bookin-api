@@ -1,10 +1,14 @@
 package main
 
 import (
-	"go.mod/handler"
 	"log"
 	"net/http"
+	"time"
+
+	"go.mod/handler"
 )
+
+const generalTimeoutSec = 15
 
 type Booking struct {
 	SellingRate float64 `json:"selling_rate"`
@@ -19,7 +23,25 @@ type StatsResponse struct {
 }
 
 func main() {
-	http.HandleFunc("/stats", handler.BookingHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	mux := http.NewServeMux()
+	addRoutes(mux)
 
+	if err := startServer(mux); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func addRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /stats", handler.BookingHandler)
+}
+
+func startServer(mux *http.ServeMux) error {
+	s := &http.Server{
+		Addr:         ":8080",
+		Handler:      mux,
+		ReadTimeout:  generalTimeoutSec * time.Second,
+		WriteTimeout: generalTimeoutSec * time.Second,
+	}
+
+	return s.ListenAndServe()
 }

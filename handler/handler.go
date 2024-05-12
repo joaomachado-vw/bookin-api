@@ -2,7 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"time"
 )
 
 type BookingRequestJSON struct {
@@ -19,9 +21,19 @@ type StatsResponseJSON struct {
 	MaxNight float64 `json:"max_night"`
 }
 
+type MaximizeProfitJSON struct {
+	requestIDs  []string `json:"request_ids"`
+	totalProfit float64  `json:"total_profit"`
+	avg_night   float64  `json:"avg_night"`
+	min_night   float64  `json:"min_night"`
+	max_night   float64  `json:"max_night"`
+}
+
 var bookings []BookingRequestJSON
 
 var statsResponse StatsResponseJSON
+
+var maxProfit MaximizeProfitJSON
 
 func BookingHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
@@ -58,7 +70,12 @@ func BookingRequestListHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		for _, bookingRequest := range bookingRequests {
 			ValidationErrorResponse(w, r, bookingRequest)
-			bookings = append(bookings, bookingRequest)
+			dateConflict := CheckDateConflict(bookingRequest)
+			if !dateConflict {
+				bookings = append(bookings, bookingRequest)
+			} else {
+				ErrorResponse(w, errors.New("Date Conflict on requested Bookings"), http.StatusBadRequest)
+			}
 		}
 		if err := json.NewEncoder(w).Encode(bookingRequests); err != nil {
 			ErrorResponse(w, err, http.StatusInternalServerError)
@@ -98,4 +115,60 @@ func StatsResponse(w http.ResponseWriter, r *http.Request) []byte {
 		return nil
 	}
 	return statsJSON
+}
+
+var dateMap = make(map[string]bool)
+
+func CheckDateConflict(bookingRequest BookingRequestJSON) bool {
+	checkIn, _ := time.Parse("2006-01-02", bookingRequest.CheckIn)
+	checkOut := checkIn.AddDate(0, 0, bookingRequest.Nights)
+	for date := checkIn; date.Before(checkOut); date = date.AddDate(0, 0, 1) {
+		dateString := date.Format("2006-01-02")
+		if dateMap[dateString] {
+			return true
+		}
+		dateMap[dateString] = true
+	}
+	return false
+}
+
+func Maximize(w http.ResponseWriter, r *http.Request) string {
+	if r.Method == http.MethodPost {
+		var bookingRequests []BookingRequestJSON
+		w.Header().Set("Content-Type", "application/json")
+		err := json.NewDecoder(r.Body).Decode(&bookingRequests)
+		if err != nil {
+			ErrorResponse(w, err, http.StatusBadRequest)
+			return ""
+		}
+		for _, bookingRequest := range bookingRequests {
+			ValidationErrorResponse(w, r, bookingRequest)
+			dateConflict := CheckDateConflict(bookingRequest)
+			if !dateConflict {
+				bookings = append(bookings, bookingRequest)
+			}
+		}
+		if err := json.NewEncoder(w).Encode(bookingRequests); err != nil {
+			ErrorResponse(w, err, http.StatusInternalServerError)
+		}
+		for _, booking := range bookings {
+			maxProfit.requestIDs = append(maxProfit.requestIDs, booking.RequestID)
+			maxProfit.totalProfit += booking.SellingRate * (booking.Margin / 100)
+			avg_night := booking.SellingRate * (booking.Margin / 100) / float64(booking.Nights)
+			maxProfit.avg_night += avg_night
+			if avg_night < maxProfit.min_night || maxProfit.min_night == 0 {
+				maxProfit.min_night = avg_night
+			}
+			if avg_night > maxProfit.max_night {
+				maxProfit.max_night = avg_night
+			}
+		}
+
+		maxProfit.avg_night /= float64(len(bookings))
+	}
+	maxProfitJSON, err := json.Marshal(maxProfit)
+	if err != nil {
+		ErrorResponse(w, err, http.StatusBadRequest)
+	}
+	return string(maxProfitJSON)
 }

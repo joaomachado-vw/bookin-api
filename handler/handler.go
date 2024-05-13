@@ -56,6 +56,7 @@ func BookingRequestHandler(w http.ResponseWriter, r *http.Request) {
 			ErrorResponse(w, err, http.StatusInternalServerError)
 		}
 	}
+	bookings = nil
 }
 
 func BookingRequestListHandler(w http.ResponseWriter, r *http.Request) {
@@ -131,6 +132,7 @@ func CheckDateConflict(bookingRequest BookingRequestJSON) bool {
 
 func Maximize(w http.ResponseWriter, r *http.Request) string {
 	if r.Method == http.MethodPost {
+
 		var bookingRequests []BookingRequestJSON
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewDecoder(r.Body).Decode(&bookingRequests)

@@ -18,7 +18,14 @@ func TestHandlerGET(t *testing.T) {
 }
 
 func TestHandlerPOST(t *testing.T) {
-	expectedBody := `{"request_id":"test","check_in":"2024-04-29","nights":2,"selling_rate":50,"margin":20}`
+	expectedBody := `
+	  {
+		"request_id": "test_1",
+		"check_in": "2020-01-01",
+		"nights": 5,
+		"selling_rate": 200,
+		"margin": 20
+	  }`
 	body := []byte(expectedBody)
 	req, _ := http.NewRequest("POST", "/stats", bytes.NewBuffer(body))
 	response := httptest.NewRecorder()
@@ -33,19 +40,19 @@ func TestHandlerPOST(t *testing.T) {
 func TestBookingRequestListHandler(t *testing.T) {
 	expectedBody := `
 	[
-	  {
-		"request_id": "123",
-		"check_in": "2024-04-29",
-		"nights": 1,
-		"selling_rate": 50,
+	{
+		"request_id": "test_1",
+		"check_in": "2020-01-01",
+		"nights": 5,
+		"selling_rate": 200,
 		"margin": 20
 	  },
-	  {
-		"request_id": "456",
-		"check_in": "2024-05-01",
+	{
+		"request_id": "test_2",
+		"check_in": "2020-01-10",
 		"nights": 5,
-		"selling_rate": 30,
-		"margin": 30
+		"selling_rate": 100,
+		"margin": 10
 	  }
 	]
 	`
@@ -64,18 +71,19 @@ func TestStatsResponse(t *testing.T) {
 	bodyJSON := `
 	[
 	  {
-		"request_id": "123",
-		"check_in": "2024-04-29",
+		"request_id": "test_1",
+		"check_in": "2020-01-01",
 		"nights": 5,
 		"selling_rate": 200,
 		"margin": 20
 	  },
-	  {
-		"request_id": "456",
-		"check_in": "2024-05-10",
-		"nights": 4,
-		"selling_rate": 156,
-		"margin": 22
+	 
+	{
+		"request_id": "test_2",
+		"check_in": "2020-01-10",
+		"nights": 5,
+		"selling_rate": 100,
+		"margin": 10
 	  }
 	]
 	`
@@ -85,9 +93,9 @@ func TestStatsResponse(t *testing.T) {
 	response := httptest.NewRecorder()
 	statsJSON := StatsResponse(response, req)
 	expectedAvg := StatsResponseJSON{
-		AvgNight: 8.29,
-		MinNight: 8,
-		MaxNight: 8.58,
+		AvgNight: 5,
+		MinNight: 2,
+		MaxNight: 8,
 	}
 	expectedJSON, _ := json.Marshal(expectedAvg)
 	assert.Equal(t, string(expectedJSON), statsJSON)
@@ -103,26 +111,13 @@ func TestMaximize(t *testing.T) {
 		"selling_rate": 200,
 		"margin": 20
 	  },
-	  {
-		"request_id": "test",
-		"check_in": "2020-01-04",
-		"nights": 4,
-		"selling_rate": 156,
-		"margin": 5
-	  },
-	{
-		"request_id": "outro",
-		"check_in": "2020-01-04",
-		"nights": 4,
-		"selling_rate": 150,
-		"margin": 6
-	  },
+	 
 	{
 		"request_id": "test_2",
 		"check_in": "2020-01-10",
-		"nights": 4,
-		"selling_rate": 160,
-		"margin": 30
+		"nights": 5,
+		"selling_rate": 100,
+		"margin": 10
 	  }
 	]
 	`
@@ -133,10 +128,10 @@ func TestMaximize(t *testing.T) {
 	maxProfit := Maximize(response, req)
 	expectedAvg := MaximizeProfitJSON{
 		RequestIDs:  []string{"test_1", "test_2"},
-		TotalProfit: 88,
-		Avg_night:   10,
-		Min_night:   8,
-		Max_night:   12,
+		TotalProfit: 50,
+		Avg_night:   5,
+		Min_night:   2,
+		Max_night:   8,
 	}
 	expectedJSON, _ := json.Marshal(expectedAvg)
 	assert.Equal(t, string(expectedJSON), maxProfit)

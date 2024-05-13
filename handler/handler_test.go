@@ -72,7 +72,7 @@ func TestStatsResponse(t *testing.T) {
 	  },
 	  {
 		"request_id": "456",
-		"check_in": "2024-05-01",
+		"check_in": "2024-05-10",
 		"nights": 4,
 		"selling_rate": 156,
 		"margin": 22
@@ -89,8 +89,8 @@ func TestStatsResponse(t *testing.T) {
 		MinNight: 8,
 		MaxNight: 8.58,
 	}
-	actualJSON, _ := json.Marshal(expectedAvg)
-	assert.Equal(t, actualJSON, statsJSON)
+	expectedJSON, _ := json.Marshal(expectedAvg)
+	assert.Equal(t, string(expectedJSON), statsJSON)
 }
 
 func TestMaximize(t *testing.T) {
@@ -132,12 +132,12 @@ func TestMaximize(t *testing.T) {
 	response := httptest.NewRecorder()
 	maxProfit := Maximize(response, req)
 	expectedAvg := MaximizeProfitJSON{
-		requestIDs:  []string{"test_1", "test_2"},
-		totalProfit: 88,
-		avg_night:   10,
-		min_night:   8,
-		max_night:   12,
+		RequestIDs:  []string{"test_1", "test_2"},
+		TotalProfit: 88,
+		Avg_night:   10,
+		Min_night:   8,
+		Max_night:   12,
 	}
-	actualJSON, _ := json.Marshal(expectedAvg)
-	assert.Equal(t, string(actualJSON), maxProfit)
+	expectedJSON, _ := json.Marshal(expectedAvg)
+	assert.Equal(t, string(expectedJSON), maxProfit)
 }

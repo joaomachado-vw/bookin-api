@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 )
@@ -22,11 +21,11 @@ type StatsResponseJSON struct {
 }
 
 type MaximizeProfitJSON struct {
-	requestIDs  []string `json:"request_ids"`
-	totalProfit float64  `json:"total_profit"`
-	avg_night   float64  `json:"avg_night"`
-	min_night   float64  `json:"min_night"`
-	max_night   float64  `json:"max_night"`
+	RequestIDs  []string `json:"request_ids"`
+	TotalProfit float64  `json:"total_profit"`
+	Avg_night   float64  `json:"avg_night"`
+	Min_night   float64  `json:"min_night"`
+	Max_night   float64  `json:"max_night"`
 }
 
 var bookings []BookingRequestJSON
@@ -73,8 +72,6 @@ func BookingRequestListHandler(w http.ResponseWriter, r *http.Request) {
 			dateConflict := CheckDateConflict(bookingRequest)
 			if !dateConflict {
 				bookings = append(bookings, bookingRequest)
-			} else {
-				ErrorResponse(w, errors.New("Date Conflict on requested Bookings"), http.StatusBadRequest)
 			}
 		}
 		if err := json.NewEncoder(w).Encode(bookingRequests); err != nil {
@@ -96,7 +93,7 @@ func ErrorResponse(w http.ResponseWriter, err error, errorType int) {
 	http.Error(w, err.Error(), errorType)
 }
 
-func StatsResponse(w http.ResponseWriter, r *http.Request) []byte {
+func StatsResponse(w http.ResponseWriter, r *http.Request) string {
 	BookingRequestListHandler(w, r)
 	for _, bookingRequest := range bookings {
 		avg_night := bookingRequest.SellingRate * (bookingRequest.Margin / 100) / float64(bookingRequest.Nights)
@@ -112,9 +109,9 @@ func StatsResponse(w http.ResponseWriter, r *http.Request) []byte {
 	statsJSON, err := json.Marshal(statsResponse)
 	if err != nil {
 		ErrorResponse(w, err, http.StatusBadRequest)
-		return nil
+		return ""
 	}
-	return statsJSON
+	return string(statsJSON)
 }
 
 var dateMap = make(map[string]bool)
@@ -152,19 +149,19 @@ func Maximize(w http.ResponseWriter, r *http.Request) string {
 			ErrorResponse(w, err, http.StatusInternalServerError)
 		}
 		for _, booking := range bookings {
-			maxProfit.requestIDs = append(maxProfit.requestIDs, booking.RequestID)
-			maxProfit.totalProfit += booking.SellingRate * (booking.Margin / 100)
+			maxProfit.RequestIDs = append(maxProfit.RequestIDs, booking.RequestID)
+			maxProfit.TotalProfit += booking.SellingRate * (booking.Margin / 100)
 			avg_night := booking.SellingRate * (booking.Margin / 100) / float64(booking.Nights)
-			maxProfit.avg_night += avg_night
-			if avg_night < maxProfit.min_night || maxProfit.min_night == 0 {
-				maxProfit.min_night = avg_night
+			maxProfit.Avg_night += avg_night
+			if avg_night < maxProfit.Min_night || maxProfit.Min_night == 0 {
+				maxProfit.Min_night = avg_night
 			}
-			if avg_night > maxProfit.max_night {
-				maxProfit.max_night = avg_night
+			if avg_night > maxProfit.Max_night {
+				maxProfit.Max_night = avg_night
 			}
 		}
 
-		maxProfit.avg_night /= float64(len(bookings))
+		maxProfit.Avg_night /= float64(len(bookings))
 	}
 	maxProfitJSON, err := json.Marshal(maxProfit)
 	if err != nil {

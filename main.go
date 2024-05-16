@@ -9,8 +9,10 @@ import (
 	"go.mod/handler"
 )
 
-const generalTimeoutSec = 15
-const serverPort = 8080
+const (
+	generalTimeoutSec = 15
+	serverPort        = 8080
+)
 
 type Booking struct {
 	SellingRate float64 `json:"selling_rate"`

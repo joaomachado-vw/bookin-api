@@ -128,8 +128,8 @@ func StatsResponseHandler(w http.ResponseWriter, r *http.Request) string {
 	}
 
 	StatsResponse.AvgNight /= float64(len(_Bookings))
-	statsJSON, err := json.Marshal(StatsResponse)
 
+	statsJSON, err := json.Marshal(StatsResponse)
 	if err != nil {
 		ErrorResponse(w, err, http.StatusBadRequest)
 

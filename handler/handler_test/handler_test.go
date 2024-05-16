@@ -41,15 +41,15 @@ func TestHandlerPOST(t *testing.T) {
 	handler.BookingRequestHandler(response, req)
 
 	var actualBooking handler.BookingRequestJSON
-	err := json.Unmarshal(response.Body.Bytes(), &actualBooking)
 
+	err := json.Unmarshal(response.Body.Bytes(), &actualBooking)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var expectedBooking handler.BookingRequestJSON
-	err = json.Unmarshal([]byte(expectedBody), &expectedBooking)
 
+	err = json.Unmarshal([]byte(expectedBody), &expectedBooking)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,12 +85,14 @@ func TestBookingRequestListHandler(t *testing.T) {
 	handler.BookingRequestListHandler(response, req)
 
 	var actualBookings []handler.BookingRequestJSON
+
 	err := json.Unmarshal(response.Body.Bytes(), &actualBookings)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var expectedBookings []handler.BookingRequestJSON
+
 	err = json.Unmarshal([]byte(expectedBody), &expectedBookings)
 	if err != nil {
 		t.Fatal(err)
@@ -132,6 +134,7 @@ func TestStatsResponse(t *testing.T) {
 		MinNight: 2,
 		MaxNight: 8,
 	}
+
 	expectedJSON, err := json.Marshal(expectedAvg)
 	if err != nil {
 		t.Fatal(err)
@@ -175,8 +178,8 @@ func TestMaximize(t *testing.T) {
 		MinNight:    2,
 		MaxNight:    8,
 	}
-	expectedJSON, err := json.Marshal(expectedAvg)
 
+	expectedJSON, err := json.Marshal(expectedAvg)
 	if err != nil {
 		t.Fatal(err)
 	}

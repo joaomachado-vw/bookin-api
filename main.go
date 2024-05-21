@@ -37,6 +37,8 @@ func main() {
 
 func addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /stats", handler.BookingHandler)
+	mux.HandleFunc("POST /stats", handler.BookingHandler)
+	mux.HandleFunc("POST /maximize", handler.MaximizeStats)
 }
 
 func startServer(mux *http.ServeMux) error {

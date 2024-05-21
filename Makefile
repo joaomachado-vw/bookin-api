@@ -9,7 +9,7 @@ test:
 	go test -v ./...
 
 coverage:
-	go test --cover -covermode=count .
+	go test ./... --cover -covermode=count .
 
 clean:
 	rm -Rf out
